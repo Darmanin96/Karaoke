@@ -5,11 +5,12 @@
 <?import javafx.scene.layout.BorderPane?>
 
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <TableView BorderPane.alignment="CENTER">
+      <TableView fx:id="tableUsuarios" maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="CENTER">
         <columns>
-          <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="500.0" text="Usuarios" />
+          <TableColumn fx:id="nombre" prefWidth="123.0" text="Nombre" />
+            <TableColumn fx:id="email" minWidth="-1.0" prefWidth="124.0" text="Email" />
         </columns>
       </TableView>
    </center>

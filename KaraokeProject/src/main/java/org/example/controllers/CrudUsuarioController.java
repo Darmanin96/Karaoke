@@ -3,21 +3,16 @@ package org.example.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.example.Conexion.UsuarioRepository;
 import org.example.Hibernate.Usuarios;
 import org.mindrot.jbcrypt.BCrypt;
 
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
@@ -40,6 +35,9 @@ public class CrudUsuarioController implements Initializable {
 
     @FXML
     private BorderPane root;
+
+    @FXML
+    private Button Cancelar;
 
     private void cerrar() {
         Stage stage = (Stage) root.getScene().getWindow();
@@ -99,6 +97,24 @@ public class CrudUsuarioController implements Initializable {
             Nombre.clear();
             Email.clear();
             Contraseña.clear();
+    }
+
+    @FXML
+    void onCancelarAction(ActionEvent event) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setHeaderText("Confirmación");
+        alerta.setContentText("¿Estás seguro?");
+        ButtonType botonSi = new ButtonType("Sí");
+        ButtonType botonNo = new ButtonType("No");
+        alerta.getButtonTypes().setAll(botonSi, botonNo);
+        Optional<ButtonType> resultado = alerta.showAndWait();
+        if (resultado.isPresent() && resultado.get() == botonSi) {
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.close();
+        } else {
+
+        }
+
     }
 
 

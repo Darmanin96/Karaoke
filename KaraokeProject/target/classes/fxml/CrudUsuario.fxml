@@ -103,6 +103,7 @@
         <items>
           <Button fx:id="Aceptar" defaultButton="true" mnemonicParsing="false" onAction="#onAceptarAction" text="Aceptar" />
             <Button fx:id="Limpiar" mnemonicParsing="false" onAction="#onLimpiarAction" text="Limpiar" />
+            <Button fx:id="Cancelar" mnemonicParsing="false" onAction="#onCancelarAction" text="Cancelar" />
         </items>
       </ToolBar>
    </bottom>

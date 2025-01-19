@@ -35,6 +35,7 @@ public class LogginController implements Initializable {
     @FXML
     private PasswordField passwordField;
 
+
     @FXML
     private GridPane root;
 
@@ -61,7 +62,6 @@ public class LogginController implements Initializable {
     void onLogginButtonAction(ActionEvent event) {
         String email = emailField.getText().trim();
         String password = passwordField.getText().trim();
-
         if (email.isEmpty() || password.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
@@ -79,6 +79,8 @@ public class LogginController implements Initializable {
 
 
         if (validarCredenciales(email, password)) {
+            Stage currentStage = (Stage) emailField.getScene().getWindow();
+            currentStage.close();
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Usuarios.fxml"));
                 Parent root = loader.load();
@@ -87,6 +89,7 @@ public class LogginController implements Initializable {
                 stage.setTitle("Usuarios");
                 stage.setScene(scene);
                 stage.show();
+                cerrar();
             }catch (IOException e){
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
@@ -119,18 +122,25 @@ public class LogginController implements Initializable {
 
     }
 
+
     private boolean validarCredenciales(String email, String password) {
         String query = "SELECT contrasena FROM usuarios WHERE email = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
+
             statement.setString(1, email);
             ResultSet resultSet = statement.executeQuery();
+
             if (resultSet.next()) {
                 String contrasenaCifrada = resultSet.getString("contrasena");
-                return BCrypt.checkpw(password, contrasenaCifrada);
+                if (contrasenaCifrada != null && !contrasenaCifrada.isEmpty()) {
+                    return BCrypt.checkpw(password, contrasenaCifrada);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            System.err.println("Hash inválido: " + e.getMessage());
         }
         return false;
     }
