@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <TableView BorderPane.alignment="CENTER">
+        <columns>
+          <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="500.0" text="Usuarios" />
+        </columns>
+      </TableView>
+   </center>
+</BorderPane>
