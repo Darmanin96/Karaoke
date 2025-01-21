@@ -1,59 +1,59 @@
 package org.example.models;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
-@Entity
+
 public class Usuario {
+    private IntegerProperty id = new SimpleIntegerProperty();
+    private StringProperty nombre = new SimpleStringProperty();
+    private StringProperty email = new SimpleStringProperty();
 
-    @Id
-    private int id;
-    private String nombre;
-    private String email;
-    private byte[] contrasena;
-
-    // Propiedades JavaFX para "nombre" y "email"
-    public StringProperty nombreProperty() {
-        return new SimpleStringProperty(nombre);
+    public Usuario(int id, String nombre, String email) {
+        this.id.set(id);
+        this.nombre.set(nombre);
+        this.email.set(email);
     }
 
-    public StringProperty emailProperty() {
-        return new SimpleStringProperty(email);
-    }
 
-    // Getters y setters
+
+    // Getters y setters (sin cambios)
     public int getId() {
+        return id.get();
+    }
+
+    public IntegerProperty idProperty() {
         return id;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.id.set(id);
     }
 
     public String getNombre() {
+        return nombre.get();
+    }
+
+    public StringProperty nombreProperty() {
         return nombre;
     }
 
     public void setNombre(String nombre) {
-        this.nombre = nombre;
+        this.nombre.set(nombre);
     }
 
     public String getEmail() {
+        return email.get();
+    }
+
+    public StringProperty emailProperty() {
         return email;
     }
 
     public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public byte[] getContrasena() {
-        return contrasena;
-    }
-
-    public void setContrasena(byte[] contrasena) {
-        this.contrasena = contrasena;
+        this.email.set(email);
     }
 }

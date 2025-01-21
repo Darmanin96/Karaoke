@@ -46,8 +46,6 @@ CREATE TABLE `canciones` (
 CREATE TABLE `canciones_cantadas` (
   `cancion_id` int(11) NOT NULL,
   `nombre_cancion` varchar(100) NOT NULL,
-  `usuario_id` int(11) NOT NULL,
-  `usuario_nombre` varchar(50) NOT NULL,
   `fecha` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
@@ -90,9 +88,7 @@ ALTER TABLE `canciones`
 --
 ALTER TABLE `canciones_cantadas`
   ADD PRIMARY KEY (`cancion_id`),
-  ADD KEY `usuario_id` (`usuario_id`),
   ADD KEY `nombre_cancion` (`nombre_cancion`),
-  ADD KEY `usuario_nombre` (`usuario_nombre`);
 
 --
 -- Indices de la tabla `usuarios`
@@ -127,9 +123,7 @@ ALTER TABLE `usuarios`
 --
 ALTER TABLE `canciones_cantadas`
   ADD CONSTRAINT `canciones_cantadas_ibfk_1` FOREIGN KEY (`cancion_id`) REFERENCES `canciones` (`id`),
-  ADD CONSTRAINT `canciones_cantadas_ibfk_2` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `canciones_cantadas_ibfk_3` FOREIGN KEY (`nombre_cancion`) REFERENCES `canciones` (`titulo`),
-  ADD CONSTRAINT `canciones_cantadas_ibfk_4` FOREIGN KEY (`usuario_nombre`) REFERENCES `usuarios` (`nombre`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

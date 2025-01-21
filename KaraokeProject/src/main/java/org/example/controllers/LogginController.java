@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.example.Conexion.DatabaseConnection;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
@@ -62,47 +63,35 @@ public class LogginController implements Initializable {
     void onLogginButtonAction(ActionEvent event) {
         String email = emailField.getText().trim();
         String password = passwordField.getText().trim();
-        if (email.isEmpty() || password.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Por favor introducir un email o una contraseña");
-            alert.showAndWait();
-        }
-
-        if (!esEmailValido(email)) {
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setTitle("Error");
-            alerta.setHeaderText("Por favor, introducir un email válido");
-            alerta.show();
-            return;
-        }
-
 
         if (validarCredenciales(email, password)) {
-            Stage currentStage = (Stage) emailField.getScene().getWindow();
-            currentStage.close();
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Usuarios.fxml"));
                 Parent root = loader.load();
+                UsuariosController usuariosController = loader.getController();
+                usuariosController.setCorreoAutenticado(email);
                 Scene scene = new Scene(root);
                 Stage stage = new Stage();
                 stage.setTitle("Usuarios");
                 stage.setScene(scene);
                 stage.show();
+
                 cerrar();
-            }catch (IOException e){
+            } catch (IOException e) {
+                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
-                alert.setHeaderText("Error");
+                alert.setHeaderText("Error al cargar la ventana de usuarios");
                 alert.showAndWait();
             }
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
-            alert.setHeaderText("Email o contraseña errónea");
+            alert.setHeaderText("Email o contraseña incorrecta");
             alert.showAndWait();
         }
     }
+
 
     @FXML
     void onCreateUserAction(ActionEvent event) {
@@ -188,4 +177,7 @@ public class LogginController implements Initializable {
     public void setRoot(GridPane root) {
         this.root = root;
     }
+
+
+
 }
