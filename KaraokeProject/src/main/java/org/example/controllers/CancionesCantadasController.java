@@ -143,8 +143,6 @@ public class CancionesCantadasController implements Initializable {
                 );
                 cancionesList.add(c);
             }
-
-            // Configurar columnas de la tabla
             TableColumn<CancionesCantadas, Integer> id = new TableColumn<>("Id");
             id.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
 
@@ -169,10 +167,6 @@ public class CancionesCantadasController implements Initializable {
             emf.close();
         }
     }
-
-
-
-
 
 
     public void setUsuarioSeleccionado(Usuario usuarioSeleccionado) {
