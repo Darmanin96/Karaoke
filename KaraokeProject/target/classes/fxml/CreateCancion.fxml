@@ -12,34 +12,35 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane fx:controller="org.example.controllers.ModificarCancionesController" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+
+<BorderPane fx:controller="org.example.controllers.CreateCancionesController" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <GridPane BorderPane.alignment="CENTER">
+      <GridPane alignment="CENTER" BorderPane.alignment="CENTER">
         <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints maxHeight="-Infinity" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="-Infinity" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="Título">
+            <Label text="Título:">
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
             </Label>
-            <Label text="Artista" GridPane.rowIndex="1">
+            <Label text="Artista:" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
             </Label>
-            <TextField fx:id="titulo" GridPane.columnIndex="1">
+            <TextField fx:id="titulo" promptText="Añadir título de la canción" GridPane.columnIndex="1">
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
             </TextField>
-            <TextField fx:id="artista" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <TextField fx:id="artista" promptText="Añadir artista de la cación" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
@@ -48,13 +49,13 @@
       </GridPane>
    </center>
    <top>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Modificar canción" BorderPane.alignment="CENTER">
-         <font>
-            <Font size="19.0" />
-         </font>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Añadir Canción" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </BorderPane.margin>
+         <font>
+            <Font size="18.0" />
+         </font>
       </Text>
    </top>
    <bottom>
@@ -70,7 +71,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="limpiar" mnemonicParsing="false" onAction="#onlimpiarAction" text="Limpiar">
+            <Button fx:id="limpiar" mnemonicParsing="false" onAction="#onLimpiarAction" text="Limpiar">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>

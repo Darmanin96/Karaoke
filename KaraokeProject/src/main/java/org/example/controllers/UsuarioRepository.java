@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import org.example.Hibernate.Canciones;
 import org.example.Hibernate.Usuarios;
 
 import javax.persistence.EntityManager;
@@ -34,6 +35,34 @@ public class UsuarioRepository {
             em.persist(usuario);
             em.getTransaction().commit();
         } finally {
+            em.close();
+        }
+    }
+
+    public boolean existeCancion(String titulo, String artista) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(c) FROM Canciones c WHERE c.titulo = :titulo OR c.artista = :artista",
+                    Long.class
+
+            );
+            query.setParameter("titulo", titulo);
+            query.setParameter("artista", artista);
+
+            return query.getSingleResult() > 0;
+        }finally {
+            em.close();
+        }
+    }
+
+    public void guardarCancion(Canciones cancion) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(cancion);
+            em.getTransaction().commit();
+        }finally {
             em.close();
         }
     }

@@ -7,24 +7,23 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class CancionesCantadas {
 
     private IntegerProperty id = new SimpleIntegerProperty();
     private StringProperty titulo = new SimpleStringProperty();
-    private ObjectProperty<Date> fecha = new SimpleObjectProperty<>();
+    private ObjectProperty<LocalDate> fecha = new SimpleObjectProperty<>();
     private IntegerProperty vecesCantada = new SimpleIntegerProperty(1);
     private IntegerProperty idUsuario = new SimpleIntegerProperty();
 
     // Constructor
-    public CancionesCantadas(int id, String titulo, Date fecha, int vecesCantada) {
+    public CancionesCantadas(int id, String titulo, LocalDate fecha, int vecesCantada) {
         this.id.set(id);
         this.titulo.set(titulo);
         this.fecha.set(fecha);
         this.vecesCantada.set(vecesCantada);
     }
-
 
     public int getId() {
         return id.get();
@@ -50,15 +49,15 @@ public class CancionesCantadas {
         return titulo;
     }
 
-    public Date getFecha() {
+    public LocalDate getFecha() {
         return fecha.get();
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha.set(fecha);
     }
 
-    public ObjectProperty<Date> fechaProperty() {
+    public ObjectProperty<LocalDate> fechaProperty() {
         return fecha;
     }
 

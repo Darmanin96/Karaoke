@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
     <persistence-unit name="KaraokePU" transaction-type="RESOURCE_LOCAL">
-        <class>org.example.Hibernate.Usuarios</class>
-        <class>org.example.Hibernate.CancionesCantada</class>
+        <class>org.example.Hibernate.CancionesCantada</class> <!-- Esta es la clase JPA -->
         <class>org.example.Hibernate.Canciones</class>
+        <class>org.example.Hibernate.Usuarios</class>
+        <class>org.example.Hibernate.CancionesCantadaId</class>
         <properties>
             <!-- Configuración de conexión -->
             <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>

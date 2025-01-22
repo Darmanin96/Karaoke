@@ -33,8 +33,9 @@
          <children>
             <ToolBar prefHeight="40.0" prefWidth="200.0">
               <items>
-                <Button mnemonicParsing="false" text="Añadir" />
-                  <Button mnemonicParsing="false" text="Eliminar" />
+                <Button fx:id="añadir" mnemonicParsing="false" onAction="#onAñadirAction" text="Añadir" />
+                  <Button fx:id="eliminar" mnemonicParsing="false" onAction="#onEliminarAction" text="Eliminar" />
+                  <Button fx:id="escuchar" mnemonicParsing="false" onAction="#onEscucharAction" text="Escuchar Nueva Canción" />
               </items>
             </ToolBar>
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1">

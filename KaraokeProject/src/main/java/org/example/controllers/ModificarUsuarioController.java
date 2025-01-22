@@ -2,17 +2,25 @@ package org.example.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import org.example.models.Usuario;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ModificarUsuarioController implements Initializable {
@@ -48,6 +56,22 @@ public class ModificarUsuarioController implements Initializable {
         this.usuariosController = usuariosController;
     }
 
+
+    @FXML
+    void onCancelarAction(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmación");
+        alert.setHeaderText("¿Estás seguro de que deseas cancelar?");
+        alert.setContentText("Los cambios no se guardarán.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.close();
+        }
+
+    }
+
+
     @FXML
     void onAceptarAction(ActionEvent event) {
         if (usuarioSeleccionado == null) {
@@ -71,23 +95,35 @@ public class ModificarUsuarioController implements Initializable {
             return;
         }
 
-        // Actualizar el usuario
         actualizarUsuario(usuarioSeleccionado.getId(), nuevoEmail, nuevaContrasena);
-
-        // Actualizar la tabla en el controlador principal
         if (usuariosController != null) {
             usuariosController.cargarTablaAlumno();
         }
 
-        // Cerrar la ventana
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Éxito");
         alert.setHeaderText("Usuario actualizado");
         alert.setContentText("El usuario se actualizó correctamente.");
         alert.showAndWait();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Loggin.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Inicio de Sesión");
+            stage.show();
 
-        root.getScene().getWindow().hide();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("No se pudo cargar la vista de inicio de sesión");
+            errorAlert.setContentText("Ocurrió un problema al intentar cargar la vista. Consulte los detalles del error.");
+            errorAlert.showAndWait();
+        }
     }
+
 
     public void actualizarUsuario(int id, String nuevoEmail, String nuevaContrasena) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
@@ -95,11 +131,7 @@ public class ModificarUsuarioController implements Initializable {
 
         try {
             em.getTransaction().begin();
-
-            // Cifrar la contraseña
             String contrasenaCifrada = org.mindrot.jbcrypt.BCrypt.hashpw(nuevaContrasena, org.mindrot.jbcrypt.BCrypt.gensalt());
-
-            // Actualizar el usuario
             String hql = "UPDATE Usuarios u SET u.email = :nuevoEmail, u.contrasena = :nuevaContrasena WHERE u.id = :id";
             int updatedCount = em.createQuery(hql)
                     .setParameter("nuevoEmail", nuevoEmail)
@@ -135,7 +167,6 @@ public class ModificarUsuarioController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Inicialización, si es necesaria
     }
 
 
