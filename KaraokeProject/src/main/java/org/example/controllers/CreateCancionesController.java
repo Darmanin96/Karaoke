@@ -31,12 +31,13 @@ public class CreateCancionesController implements Initializable {
 
     @FXML
     void onCancelarAction(ActionEvent event) {
-            
+
     }
 
     @FXML
     void onLimpiarAction(ActionEvent event) {
-
+        titulo.clear();
+        artista.clear();
     }
 
 
