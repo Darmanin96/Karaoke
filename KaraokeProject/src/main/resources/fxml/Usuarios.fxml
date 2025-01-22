@@ -6,9 +6,9 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UsuariosController">
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UsuariosController">
    <center>
-      <TableView fx:id="tableUsuarios" maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="CENTER">
+      <TableView fx:id="tableUsuarios" BorderPane.alignment="CENTER">
         <columns>
             <TableColumn fx:id="id" prefWidth="75.0" text="ID" />
           <TableColumn fx:id="nombre" prefWidth="123.0" text="Nombre" />
