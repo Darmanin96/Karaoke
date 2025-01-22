@@ -6,13 +6,13 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UsuariosController">
+<BorderPane fx:id="root" maxHeight="1.7976931348623157E308" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UsuariosController">
    <center>
       <TableView fx:id="tableUsuarios" BorderPane.alignment="CENTER">
         <columns>
-            <TableColumn fx:id="id" prefWidth="75.0" text="ID" />
-          <TableColumn fx:id="nombre" prefWidth="123.0" text="Nombre" />
-            <TableColumn fx:id="email" minWidth="-1.0" prefWidth="124.0" text="Email" />
+            <TableColumn fx:id="id" prefWidth="43.999998450279236" text="ID" />
+          <TableColumn fx:id="nombre" prefWidth="102.40001678466797" text="Nombre" />
+            <TableColumn fx:id="email" minWidth="-1.0" prefWidth="177.5999755859375" text="Email" />
         </columns>
       </TableView>
    </center>
