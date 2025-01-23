@@ -41,14 +41,6 @@ public class UsuarioRepository {
         }
     }
 
-    public List<Usuarios> obtenerUsuarios() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<Usuarios> query = em.createQuery("SELECT u FROM Usuarios u", Usuarios.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
+
 }
 

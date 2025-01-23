@@ -149,31 +149,63 @@ public class CancionesCantadasController implements Initializable {
     private void eliminarCancionCantadas(CancionesCantadas cancion) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
+
         try {
+            // Comenzar la transacción
             em.getTransaction().begin();
+
+            // Obtener los parámetros necesarios para la clave primaria compuesta
             String titulo = cancion.getTitulo();
             Integer cancionId = cancion.getId();
+
+            // Verificar si los valores de los parámetros son correctos
+            System.out.println("Eliminando canción con ID: " + cancionId + " y título: " + titulo);
+
+            // Buscar la entidad Canciones en la base de datos con el ID
             Canciones cancionEntidad = em.find(Canciones.class, cancionId);
+
+            if (cancionEntidad == null) {
+                System.err.println("No se encontró la canción con ID: " + cancionId);
+                return; // Si no se encuentra, no se puede proceder
+            }
+
+            // Crear la clave primaria compuesta para la entidad CancionesCantada
             CancionesCantadaId id = new CancionesCantadaId(cancionEntidad, titulo);
+
+            // Imprimir el valor del ID para depuración
+            System.out.println("Buscando CancionesCantada con ID: " + id);
+
+            // Buscar la entidad CancionesCantada utilizando la clave primaria compuesta
             CancionesCantada cancionCantadaHibernate = em.find(CancionesCantada.class, id);
 
             if (cancionCantadaHibernate != null) {
+                // Imprimir los detalles de la Canción Cantada antes de eliminarla
+                System.out.println("Encontrada Canción Cantada: " + cancionCantadaHibernate);
+
+                // Eliminar la entidad CancionesCantada
                 em.remove(cancionCantadaHibernate);
+
+                // Confirmar la transacción
                 em.getTransaction().commit();
                 System.out.println("Canción eliminada exitosamente.");
             } else {
-                System.err.println("No se encontró la canción en la base de datos.");
+                System.err.println("No se encontró la Canción Cantada con ID: " + id);
             }
+
         } catch (Exception e) {
+            // Si ocurre algún error, revertir la transacción
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             e.printStackTrace();
         } finally {
+            // Cerrar EntityManager y EntityManagerFactory
             em.close();
             emf.close();
         }
     }
+
+
 
 
 

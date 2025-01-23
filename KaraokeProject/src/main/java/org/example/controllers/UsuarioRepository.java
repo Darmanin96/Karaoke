@@ -1,12 +1,15 @@
 package org.example.controllers;
 
 import org.example.Hibernate.Canciones;
+import org.example.Hibernate.CancionesCantada;
 import org.example.Hibernate.Usuarios;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
+import java.util.Date;
 
 public class UsuarioRepository {
 
@@ -66,5 +69,37 @@ public class UsuarioRepository {
             em.close();
         }
     }
-}
+
+    public boolean existeCancionCantada(String titulo) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(c) FROM CancionesCantada c WHERE c.titulo = :titulo",
+                    Long.class
+            );
+            query.setParameter("titulo", titulo);
+            return query.getSingleResult() > 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void guardarCancionCantada(String titulo, Date fecha, int vecesCantada) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            CancionesCantada cancion = new CancionesCantada();
+            cancion.setTitulo(titulo);
+            cancion.setFecha(fecha);
+            cancion.setVecesCantada(vecesCantada);
+            em.persist(cancion);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+    }
+
+
+
 
