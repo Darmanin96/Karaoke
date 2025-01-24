@@ -14,8 +14,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.persistence.*;
 import org.example.Hibernate.*;
-
-
 import org.example.models.*;
 
 import java.io.IOException;
@@ -44,9 +42,6 @@ public class CancionesCantadasController implements Initializable {
     @FXML
     private Button escuchar;
 
-
-
-
     @FXML
     private TableView<CancionesCantadas> tableCancionesCantadas;
 
@@ -56,14 +51,9 @@ public class CancionesCantadasController implements Initializable {
     @FXML
     private TableColumn<CancionesCantadas, Integer> vecesCantadas;
 
-    private Usuario usuarioSeleccionado;
-
-    private ObservableList<CancionesCantadas> cancionesList = FXCollections.observableArrayList();
-
     private Integer usuarioId;
 
-
-
+    private ObservableList<CancionesCantadas> cancionesList = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -71,6 +61,8 @@ public class CancionesCantadasController implements Initializable {
         titulo.setCellValueFactory(cellData -> cellData.getValue().tituloProperty());
         fecha.setCellValueFactory(cellData -> cellData.getValue().fechaProperty());
         vecesCantadas.setCellValueFactory(cellData -> cellData.getValue().vecesCantadaProperty().asObject());
+
+        // Formatear la fecha
         fecha.setCellFactory(column -> new TableCell<CancionesCantadas, LocalDate>() {
             @Override
             protected void updateItem(LocalDate item, boolean empty) {
@@ -82,9 +74,8 @@ public class CancionesCantadasController implements Initializable {
                 }
             }
         });
+
         cargarTablaCancionesCantadas();
-
-
     }
 
     @FXML
@@ -92,19 +83,19 @@ public class CancionesCantadasController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AñadirCancionesCantadas.fxml"));
             Parent root = loader.load();
+            AñadirCancionesCantadasController controller = loader.getController();
+            controller.setUsuarioId(usuarioId); // Asignar el usuarioId
+            controller.setCancionesCantadasController(this); // Inyectar el controlador CancionesCantadasController
             Stage stage = new Stage();
             stage.setTitle("Karaoke App");
             stage.setScene(new Scene(root));
             stage.initStyle(StageStyle.UNDECORATED);
-            AñadirCancionesCantadasController controller = loader.getController();
-            controller.setUsuarioId(1);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la vista AñadirCancionesCantadas.fxml");
             e.printStackTrace();
         }
     }
-
 
 
     @FXML
@@ -117,23 +108,19 @@ public class CancionesCantadasController implements Initializable {
             stage.setScene(new Scene(root));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.show();
-
         } catch (IOException e) {
-            System.err.println("Error al cargar la vista Canciones.fxml");
+            System.err.println("Error al cargar la vista Crear Cancion.");
             e.printStackTrace();
         }
     }
 
-
-
-
     @FXML
     void onEliminarAction(ActionEvent event) {
-        // Obtener la canción seleccionada en la tabla
+        // Obtener la canción seleccionada
         CancionesCantadas cancionSeleccionada = tableCancionesCantadas.getSelectionModel().getSelectedItem();
 
         if (cancionSeleccionada == null) {
-            // Si no se ha seleccionado ninguna canción, mostrar un mensaje de advertencia
+            // Si no se seleccionó ninguna canción
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Selección inválida");
             alert.setHeaderText("No se ha seleccionado ninguna canción");
@@ -142,34 +129,21 @@ public class CancionesCantadasController implements Initializable {
             return;
         }
 
-        // Obtener los detalles necesarios para eliminar
         String tituloCancion = cancionSeleccionada.getTitulo();
-        Integer idUsuario = 1;
 
-        // Confirmar con el usuario si está seguro de eliminar
+        // Confirmación antes de eliminar
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmación de eliminación");
         alert.setHeaderText("¿Estás seguro de que deseas eliminar esta canción?");
         alert.setContentText("Se eliminará la canción con el título: " + tituloCancion);
 
         Optional<ButtonType> result = alert.showAndWait();
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Proceder con la eliminación si el usuario confirma
-            eliminarCancion(idUsuario, tituloCancion);
+            eliminarCancion(tituloCancion);
         }
     }
 
-
-
-    private void eliminarCancion(Integer idUsuario, String tituloCancion) {
-        // Validar que el título no sea nulo ni vacío
-        if (tituloCancion == null || tituloCancion.trim().isEmpty()) {
-            System.out.println("El título de la canción no es válido.");
-            return;
-        }
-
-        // Crear una instancia de EntityManager
+    private void eliminarCancion(String tituloCancion) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
         try {
@@ -177,35 +151,20 @@ public class CancionesCantadasController implements Initializable {
             String jpql = "SELECT c FROM CancionesCantada c WHERE c.titulo = :tituloCancion";
             TypedQuery<CancionesCantada> query = em.createQuery(jpql, CancionesCantada.class);
             query.setParameter("tituloCancion", tituloCancion);
-            CancionesCantada cancion = query.getSingleResult();  // Si no se encuentra, lanza NoResultException
-
-            // Eliminar la canción
+            CancionesCantada cancion = query.getSingleResult();
             em.remove(cancion);
-
-            // Commit de la transacción
             em.getTransaction().commit();
-            System.out.println("Canción eliminada exitosamente: " + tituloCancion);
             cargarTablaCancionesCantadas();
-
         } catch (NoResultException e) {
-            System.out.println("No se encontró la canción con el título: " + tituloCancion);
+            System.out.println("Canción no encontrada: " + tituloCancion);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error al eliminar la canción de la base de datos.");
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();  // Hacer rollback si ocurre un error
-            }
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
         } finally {
             em.close();
             emf.close();
         }
     }
-
-
-
-
-
-
 
     @FXML
     void onFiltrarAction(ActionEvent event) {
@@ -215,13 +174,8 @@ public class CancionesCantadasController implements Initializable {
         }
     }
 
-
-
     public void cargarTablaFecha(LocalDate fechaSeleccionada) {
-        if (usuarioId == null) {
-            System.err.println("El ID del usuario es null. No se puede cargar la tabla.");
-            return;
-        }
+        if (usuarioId == null) return;
         cancionesList.clear();
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
@@ -232,28 +186,19 @@ public class CancionesCantadasController implements Initializable {
             query.setParameter("fechaSeleccionada", java.sql.Date.valueOf(fechaSeleccionada));
             List<CancionesCantada> result = query.getResultList();
             for (CancionesCantada cancion : result) {
-                CancionesCantadas c = new CancionesCantadas(
-                        cancion.getIdUsuario(),
-                        cancion.getTitulo(),
+                CancionesCantadas c = new CancionesCantadas(cancion.getIdUsuario(), cancion.getTitulo(),
                         cancion.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                        cancion.getVecesCantada()
-                );
+                        cancion.getVecesCantada());
                 cancionesList.add(c);
             }
-
             tableCancionesCantadas.setItems(cancionesList);
-            tableCancionesCantadas.refresh();
-
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error al obtener los datos con Hibernate.");
         } finally {
             em.close();
             emf.close();
         }
     }
-
-
 
     public void cargarTablaCancionesCantadas() {
         cancionesList.clear();
@@ -264,39 +209,29 @@ public class CancionesCantadasController implements Initializable {
             TypedQuery<CancionesCantada> query = em.createQuery(jpql, CancionesCantada.class);
             query.setParameter("usuarioId", usuarioId);
             List<CancionesCantada> result = query.getResultList();
-
-            // Convertimos cada CancionesCantada a CancionesCantadas
             for (CancionesCantada cancion : result) {
-                CancionesCantadas c = new CancionesCantadas(
-                        cancion.getIdUsuario(),
-                        cancion.getTitulo(),
+                CancionesCantadas c = new CancionesCantadas(cancion.getIdUsuario(), cancion.getTitulo(),
                         cancion.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                        cancion.getVecesCantada()
-                );
+                        cancion.getVecesCantada());
                 cancionesList.add(c);
             }
-
             tableCancionesCantadas.setItems(cancionesList);
-            tableCancionesCantadas.refresh();
-
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error al obtener los datos con Hibernate.");
         } finally {
             em.close();
             emf.close();
         }
     }
 
-
-
-
-
     public void setUsuarioId(Integer usuarioId) {
         this.usuarioId = usuarioId;
         cargarTablaCancionesCantadas();
     }
 
+    public Integer getUsuarioId() {
+        return usuarioId;
+    }
 
     public DatePicker getDatePicker() {
         return datePicker;
@@ -338,6 +273,14 @@ public class CancionesCantadasController implements Initializable {
         this.root = root;
     }
 
+    public Button getEscuchar() {
+        return escuchar;
+    }
+
+    public void setEscuchar(Button escuchar) {
+        this.escuchar = escuchar;
+    }
+
     public TableView<CancionesCantadas> getTableCancionesCantadas() {
         return tableCancionesCantadas;
     }
@@ -362,14 +305,6 @@ public class CancionesCantadasController implements Initializable {
         this.vecesCantadas = vecesCantadas;
     }
 
-    public Usuario getUsuarioSeleccionado() {
-        return usuarioSeleccionado;
-    }
-
-    public void setUsuarioSeleccionado(Usuario usuarioSeleccionado) {
-        this.usuarioSeleccionado = usuarioSeleccionado;
-    }
-
     public ObservableList<CancionesCantadas> getCancionesList() {
         return cancionesList;
     }
@@ -377,10 +312,4 @@ public class CancionesCantadasController implements Initializable {
     public void setCancionesList(ObservableList<CancionesCantadas> cancionesList) {
         this.cancionesList = cancionesList;
     }
-
-    public Integer getUsuarioId() {
-        return usuarioId;
-    }
-
-
 }

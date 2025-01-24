@@ -52,47 +52,41 @@ public class AñadirCancionesCantadasController implements Initializable {
 
     @FXML
     void onAceptarAction(ActionEvent event) {
-        String tituloCancion = cancion.getValue();  // Obtienes el título de la canción seleccionada en el ChoiceBox
+        String tituloCancion = cancion.getValue();
         int vecesCantada = escuchar.getValue();
         LocalDate localDate = LocalDate.now();
         Date sqlDate = Date.valueOf(localDate);
 
-        System.out.println("Título de la canción: " + tituloCancion);
-        System.out.println("Veces cantada: " + vecesCantada);
-        System.out.println("Fecha actual: " + localDate);
-
-        // Crear la consulta JPQL para obtener la entidad Canciones por su título
+        // Consultar si la canción existe
         String jpql = "SELECT c FROM Canciones c WHERE c.titulo = :titulo";
         try {
             TypedQuery<Canciones> query = em.createQuery(jpql, Canciones.class);
             query.setParameter("titulo", tituloCancion);
-
-            // Ejecutar la consulta y obtener la entidad Canciones
             Canciones cancionEntidad = query.getSingleResult();
-            System.out.println("Canción encontrada: " + cancionEntidad.getTitulo());
-            CancionesCantada nuevaCancionCantada = new CancionesCantada();
-            nuevaCancionCantada.setCancion(cancionEntidad);  // Asignamos la entidad Canciones
-            nuevaCancionCantada.setTitulo(tituloCancion);    // Asignamos el título
-            nuevaCancionCantada.setFecha(sqlDate);           // Asignamos la fecha
-            nuevaCancionCantada.setVecesCantada(vecesCantada);
-            nuevaCancionCantada.setIdUsuario(usuarioId);    // Asigna el id del usuario si lo tienes
 
-            // Persistir la entidad CancionesCantada
+            // Crear la entrada de CancionesCantadas
+            CancionesCantada nuevaCancionCantada = new CancionesCantada();
+            nuevaCancionCantada.setCancion(cancionEntidad);
+            nuevaCancionCantada.setTitulo(tituloCancion);
+            nuevaCancionCantada.setFecha(sqlDate);
+            nuevaCancionCantada.setVecesCantada(vecesCantada);
+            nuevaCancionCantada.setIdUsuario(usuarioId);
+
+            // Persistir la nueva canción cantada
             em.getTransaction().begin();
             em.persist(nuevaCancionCantada);
             em.getTransaction().commit();
 
-            System.out.println("Canción cantada insertada correctamente.");
+            // Cerrar y actualizar la tabla
             cerrar();
             cancionesCantadasController.cargarTablaCancionesCantadas();
+
         } catch (NoResultException e) {
-            System.out.println("No se encontró ninguna canción con el título: " + tituloCancion);
+            System.out.println("Canción no encontrada con el título: " + tituloCancion);
         } catch (PersistenceException e) {
             e.printStackTrace();
         }
     }
-
-
 
     @FXML
     void onCancelarAction(ActionEvent event) {
@@ -135,16 +129,23 @@ public class AñadirCancionesCantadasController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Inicializar spinner
+        // Inicializar el Spinner
         escuchar.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1));
-        escuchar.getValueFactory().setValue(1);
 
-        // Inicializar EntityManager
-        emf = Persistence.createEntityManagerFactory("KaraokePU");  // Asegúrate de que el nombre de la unidad de persistencia sea correcto
+        // Inicializar el EntityManager
+        emf = Persistence.createEntityManagerFactory("KaraokePU");
         em = emf.createEntityManager();
 
         // Cargar canciones en el ChoiceBox
         cargarTituloCancionesCantadas();
+    }
+
+    public void setUsuarioId(Integer usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
+    public Integer getUsuarioId() {
+        return usuarioId;
     }
 
     public Button getAceptar() {
@@ -195,9 +196,27 @@ public class AñadirCancionesCantadasController implements Initializable {
         this.root = root;
     }
 
-    public void setUsuarioId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public EntityManagerFactory getEmf() {
+        return emf;
     }
 
+    public void setEmf(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
+    public EntityManager getEm() {
+        return em;
+    }
+
+    public void setEm(EntityManager em) {
+        this.em = em;
+    }
+
+    public CancionesCantadasController getCancionesCantadasController() {
+        return cancionesCantadasController;
+    }
+
+    public void setCancionesCantadasController(CancionesCantadasController cancionesCantadasController) {
+        this.cancionesCantadasController = cancionesCantadasController;
+    }
 }
