@@ -17,7 +17,7 @@ public class CancionesCantada {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cancion_id", referencedColumnName = "id")
+    @JoinColumn(name = "cancion_id", referencedColumnName = "id", nullable = false)
     private Canciones cancion;
 
     @Id
@@ -33,14 +33,16 @@ public class CancionesCantada {
     @Column(name = "id_usuario")
     private int idUsuario;
 
-
-
-
-
     // Getters y setters
     public Canciones getCancion() {
         return cancion;
     }
+
+    public void setcancion_id(Canciones cancion) {
+        this.cancion = cancion;
+    }
+
+
 
     public void setCancion(Canciones cancion) {
         this.cancion = cancion;
@@ -78,7 +80,6 @@ public class CancionesCantada {
         this.idUsuario = idUsuario;
     }
 
+    public void setId(CancionesCantadaId id) {
+    }
 }
-
-
-

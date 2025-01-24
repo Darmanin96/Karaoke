@@ -8,10 +8,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
 import javax.persistence.*;
 import org.example.Hibernate.*;
-import org.example.Hibernate.Canciones;
-import org.example.models.*;
 
 import java.net.URL;
 import java.sql.*;
@@ -41,65 +40,57 @@ public class AñadirCancionesCantadasController implements Initializable {
 
     private Integer usuarioId;
 
+    private EntityManagerFactory emf;
+    private EntityManager em;
+
+    private CancionesCantadasController cancionesCantadasController;
+
+    private void cerrar() {
+        Stage stage = (Stage) root.getScene().getWindow();
+        stage.close();
+    }
 
     @FXML
     void onAceptarAction(ActionEvent event) {
-        String tituloCancion = cancion.getValue(); // Título seleccionado
-        int vecesCantada = escuchar.getValue(); // Veces cantada
-        System.out.println(vecesCantada);
-        System.out.println(tituloCancion);
-        System.out.println(usuarioId);
-
+        String tituloCancion = cancion.getValue();  // Obtienes el título de la canción seleccionada en el ChoiceBox
+        int vecesCantada = escuchar.getValue();
         LocalDate localDate = LocalDate.now();
         Date sqlDate = Date.valueOf(localDate);
 
-        if (tituloCancion != null && !tituloCancion.isEmpty() && usuarioId != null) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
-            EntityManager em = emf.createEntityManager();
+        System.out.println("Título de la canción: " + tituloCancion);
+        System.out.println("Veces cantada: " + vecesCantada);
+        System.out.println("Fecha actual: " + localDate);
 
-            try {
-                em.getTransaction().begin();
-                String jpql = "SELECT c.id FROM Canciones c WHERE c.titulo = :titulo";
-                TypedQuery<Integer> query = em.createQuery(jpql, Integer.class);
-                query.setParameter("titulo", tituloCancion);
+        // Crear la consulta JPQL para obtener la entidad Canciones por su título
+        String jpql = "SELECT c FROM Canciones c WHERE c.titulo = :titulo";
+        try {
+            TypedQuery<Canciones> query = em.createQuery(jpql, Canciones.class);
+            query.setParameter("titulo", tituloCancion);
 
-                Integer cancionId = query.getSingleResult();
+            // Ejecutar la consulta y obtener la entidad Canciones
+            Canciones cancionEntidad = query.getSingleResult();
+            System.out.println("Canción encontrada: " + cancionEntidad.getTitulo());
+            CancionesCantada nuevaCancionCantada = new CancionesCantada();
+            nuevaCancionCantada.setCancion(cancionEntidad);  // Asignamos la entidad Canciones
+            nuevaCancionCantada.setTitulo(tituloCancion);    // Asignamos el título
+            nuevaCancionCantada.setFecha(sqlDate);           // Asignamos la fecha
+            nuevaCancionCantada.setVecesCantada(vecesCantada);
+            nuevaCancionCantada.setIdUsuario(usuarioId);    // Asigna el id del usuario si lo tienes
 
-                // Obtener la canción desde la base de datos antes de asociarla
-                Canciones cancion = em.find(Canciones.class, cancionId);
+            // Persistir la entidad CancionesCantada
+            em.getTransaction().begin();
+            em.persist(nuevaCancionCantada);
+            em.getTransaction().commit();
 
-                if (cancion != null) {
-                    // Crear y persistir la CancionesCantada
-                    CancionesCantada cancionesCantada = new CancionesCantada();
-                    cancionesCantada.setTitulo(tituloCancion);
-                    cancionesCantada.setVecesCantada(vecesCantada);
-                    cancionesCantada.setIdUsuario(usuarioId);
-                    cancionesCantada.setFecha(sqlDate);
-                    cancionesCantada.setCancion(cancion);  // Asignamos el objeto Canciones
-
-                    em.persist(cancionesCantada);  // Guardamos la entidad CancionesCantada
-                    em.getTransaction().commit();  // Confirmamos la transacción
-                    System.out.println("Inserción realizada con éxito en canciones_cantadas.");
-                } else {
-                    System.err.println("Canción no encontrada en la base de datos.");
-                    em.getTransaction().rollback();  // Deshacemos la transacción si no se encuentra la canción
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Error al insertar en canciones_cantadas.");
-                if (em.getTransaction().isActive()) {
-                    em.getTransaction().rollback(); // Deshacer la transacción en caso de error
-                }
-            } finally {
-                em.close();
-                emf.close();
-            }
-        } else {
-            System.err.println("No se ha proporcionado toda la información necesaria.");
+            System.out.println("Canción cantada insertada correctamente.");
+            cerrar();
+            cancionesCantadasController.cargarTablaCancionesCantadas();
+        } catch (NoResultException e) {
+            System.out.println("No se encontró ninguna canción con el título: " + tituloCancion);
+        } catch (PersistenceException e) {
+            e.printStackTrace();
         }
     }
-
-
 
 
 
@@ -139,13 +130,20 @@ public class AñadirCancionesCantadasController implements Initializable {
     @FXML
     void onLimpiarAction(ActionEvent event) {
         cancion.getSelectionModel().clearSelection();
-        escuchar.getValueFactory().setValue(1);  // Restablecer el Spinner a 1
+        escuchar.getValueFactory().setValue(1);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Inicializar spinner
         escuchar.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1));
         escuchar.getValueFactory().setValue(1);
+
+        // Inicializar EntityManager
+        emf = Persistence.createEntityManagerFactory("KaraokePU");  // Asegúrate de que el nombre de la unidad de persistencia sea correcto
+        em = emf.createEntityManager();
+
+        // Cargar canciones en el ChoiceBox
         cargarTituloCancionesCantadas();
     }
 

@@ -10,26 +10,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.example.Hibernate.Canciones;
-import org.example.Hibernate.CancionesCantada;
-import org.example.Hibernate.CancionesCantadaId;
-import org.example.models.CancionesCantadas;
-import org.example.models.Usuario;
+import javax.persistence.*;
+import org.example.Hibernate.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
+
+import org.example.models.*;
+
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class CancionesCantadasController implements Initializable {
 
@@ -69,6 +62,9 @@ public class CancionesCantadasController implements Initializable {
 
     private Integer usuarioId;
 
+
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         id.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
@@ -86,8 +82,9 @@ public class CancionesCantadasController implements Initializable {
                 }
             }
         });
-
         cargarTablaCancionesCantadas();
+
+
     }
 
     @FXML
@@ -100,15 +97,14 @@ public class CancionesCantadasController implements Initializable {
             stage.setScene(new Scene(root));
             stage.initStyle(StageStyle.UNDECORATED);
             AñadirCancionesCantadasController controller = loader.getController();
-            // Pasar el usuarioId al controlador
-            controller.setUsuarioId(this.usuarioId);
+            controller.setUsuarioId(1);
             stage.show();
-
         } catch (IOException e) {
-            System.err.println("Error al cargar la vista Canciones.fxml");
+            System.err.println("Error al cargar la vista AñadirCancionesCantadas.fxml");
             e.printStackTrace();
         }
     }
+
 
 
     @FXML
@@ -130,83 +126,81 @@ public class CancionesCantadasController implements Initializable {
 
 
 
+
     @FXML
     void onEliminarAction(ActionEvent event) {
-        CancionesCantadas cancionesCantadasSeleccionado = tableCancionesCantadas.getSelectionModel().getSelectedItem();
-        if (cancionesCantadasSeleccionado != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Eliminar Cancion");
-            alert.setHeaderText("Estas segurode elimnar esta cancion");
-            ButtonType botonSi = new ButtonType("Si");
-            ButtonType botonNo = new ButtonType("No");
-            alert.getButtonTypes().setAll(botonSi, botonNo);
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == botonSi) {
-                eliminarCancionCantadas(cancionesCantadasSeleccionado);
-                cargarTablaCancionesCantadas();
-            }
+        // Obtener la canción seleccionada en la tabla
+        CancionesCantadas cancionSeleccionada = tableCancionesCantadas.getSelectionModel().getSelectedItem();
+
+        if (cancionSeleccionada == null) {
+            // Si no se ha seleccionado ninguna canción, mostrar un mensaje de advertencia
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Selección inválida");
+            alert.setHeaderText("No se ha seleccionado ninguna canción");
+            alert.setContentText("Por favor, selecciona una canción para eliminar.");
+            alert.showAndWait();
+            return;
         }
 
+        // Obtener los detalles necesarios para eliminar
+        String tituloCancion = cancionSeleccionada.getTitulo();
+        Integer idUsuario = 1;
+
+        // Confirmar con el usuario si está seguro de eliminar
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmación de eliminación");
+        alert.setHeaderText("¿Estás seguro de que deseas eliminar esta canción?");
+        alert.setContentText("Se eliminará la canción con el título: " + tituloCancion);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Proceder con la eliminación si el usuario confirma
+            eliminarCancion(idUsuario, tituloCancion);
+        }
     }
 
-    private void eliminarCancionCantadas(CancionesCantadas cancion) {
+
+
+    private void eliminarCancion(Integer idUsuario, String tituloCancion) {
+        // Validar que el título no sea nulo ni vacío
+        if (tituloCancion == null || tituloCancion.trim().isEmpty()) {
+            System.out.println("El título de la canción no es válido.");
+            return;
+        }
+
+        // Crear una instancia de EntityManager
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
-
         try {
-            // Comenzar la transacción
             em.getTransaction().begin();
+            String jpql = "SELECT c FROM CancionesCantada c WHERE c.titulo = :tituloCancion";
+            TypedQuery<CancionesCantada> query = em.createQuery(jpql, CancionesCantada.class);
+            query.setParameter("tituloCancion", tituloCancion);
+            CancionesCantada cancion = query.getSingleResult();  // Si no se encuentra, lanza NoResultException
 
-            // Obtener los parámetros necesarios para la clave primaria compuesta
-            String titulo = cancion.getTitulo();
-            Integer cancionId = cancion.getId();
+            // Eliminar la canción
+            em.remove(cancion);
 
-            // Verificar si los valores de los parámetros son correctos
-            System.out.println("Eliminando canción con ID: " + cancionId + " y título: " + titulo);
+            // Commit de la transacción
+            em.getTransaction().commit();
+            System.out.println("Canción eliminada exitosamente: " + tituloCancion);
+            cargarTablaCancionesCantadas();
 
-            // Buscar la entidad Canciones en la base de datos con el ID
-            Canciones cancionEntidad = em.find(Canciones.class, cancionId);
-
-            if (cancionEntidad == null) {
-                System.err.println("No se encontró la canción con ID: " + cancionId);
-                return; // Si no se encuentra, no se puede proceder
-            }
-
-            // Crear la clave primaria compuesta para la entidad CancionesCantada
-            CancionesCantadaId id = new CancionesCantadaId(cancionEntidad, titulo);
-
-            // Imprimir el valor del ID para depuración
-            System.out.println("Buscando CancionesCantada con ID: " + id);
-
-            // Buscar la entidad CancionesCantada utilizando la clave primaria compuesta
-            CancionesCantada cancionCantadaHibernate = em.find(CancionesCantada.class, id);
-
-            if (cancionCantadaHibernate != null) {
-                // Imprimir los detalles de la Canción Cantada antes de eliminarla
-                System.out.println("Encontrada Canción Cantada: " + cancionCantadaHibernate);
-
-                // Eliminar la entidad CancionesCantada
-                em.remove(cancionCantadaHibernate);
-
-                // Confirmar la transacción
-                em.getTransaction().commit();
-                System.out.println("Canción eliminada exitosamente.");
-            } else {
-                System.err.println("No se encontró la Canción Cantada con ID: " + id);
-            }
-
+        } catch (NoResultException e) {
+            System.out.println("No se encontró la canción con el título: " + tituloCancion);
         } catch (Exception e) {
-            // Si ocurre algún error, revertir la transacción
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             e.printStackTrace();
+            System.out.println("Error al eliminar la canción de la base de datos.");
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();  // Hacer rollback si ocurre un error
+            }
         } finally {
-            // Cerrar EntityManager y EntityManagerFactory
             em.close();
             emf.close();
         }
     }
+
 
 
 
@@ -228,7 +222,6 @@ public class CancionesCantadasController implements Initializable {
             System.err.println("El ID del usuario es null. No se puede cargar la tabla.");
             return;
         }
-
         cancionesList.clear();
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
@@ -238,8 +231,6 @@ public class CancionesCantadasController implements Initializable {
             query.setParameter("usuarioId", usuarioId);
             query.setParameter("fechaSeleccionada", java.sql.Date.valueOf(fechaSeleccionada));
             List<CancionesCantada> result = query.getResultList();
-
-            // Convertimos cada CancionesCantada a CancionesCantadas
             for (CancionesCantada cancion : result) {
                 CancionesCantadas c = new CancionesCantadas(
                         cancion.getIdUsuario(),
@@ -262,12 +253,9 @@ public class CancionesCantadasController implements Initializable {
         }
     }
 
-    public void cargarTablaCancionesCantadas() {
-        if (usuarioId == null) {
-            System.err.println("El ID del usuario es null. No se puede cargar la tabla.");
-            return;
-        }
 
+
+    public void cargarTablaCancionesCantadas() {
         cancionesList.clear();
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
         EntityManager em = emf.createEntityManager();
@@ -393,4 +381,6 @@ public class CancionesCantadasController implements Initializable {
     public Integer getUsuarioId() {
         return usuarioId;
     }
+
+
 }
