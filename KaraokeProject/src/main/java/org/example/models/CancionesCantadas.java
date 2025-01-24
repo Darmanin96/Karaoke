@@ -84,4 +84,6 @@ public class CancionesCantadas {
     public void setIdUsuario(int idUsuario) {
         this.idUsuario.set(idUsuario);
     }
+
+
 }

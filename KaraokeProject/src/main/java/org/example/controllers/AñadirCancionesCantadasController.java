@@ -8,6 +8,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javax.persistence.*;
+import org.example.Hibernate.*;
+import org.example.Hibernate.Canciones;
+import org.example.models.*;
 
 import java.net.URL;
 import java.sql.*;
@@ -35,102 +39,69 @@ public class AñadirCancionesCantadasController implements Initializable {
     @FXML
     private BorderPane root;
 
+    private Integer usuarioId;
+
+
     @FXML
     void onAceptarAction(ActionEvent event) {
-        // Recuperamos los datos del formulario
-        String tituloCancion = cancion.getValue();
-        int vecesCantada = escuchar.getValue();
+        String tituloCancion = cancion.getValue(); // Título seleccionado
+        int vecesCantada = escuchar.getValue(); // Veces cantada
+        System.out.println(vecesCantada);
+        System.out.println(tituloCancion);
+        System.out.println(usuarioId);
 
-        // Validar los campos
-        if (tituloCancion == null || vecesCantada <= 0) {
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setHeaderText("Error");
-            alerta.setContentText("Por favor, selecciona una canción y establece un número de veces cantadas válido.");
-            alerta.showAndWait();
-            return;
-        }
+        LocalDate localDate = LocalDate.now();
+        Date sqlDate = Date.valueOf(localDate);
 
-        // Buscar el id de la canción seleccionada en la base de datos
-        int cancionId = -1;
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "SELECT id FROM canciones WHERE titulo = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, tituloCancion);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    cancionId = rs.getInt("id");
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setHeaderText("Error");
-            alerta.setContentText("Hubo un error al acceder a la base de datos.");
-            alerta.showAndWait();
-            return;
-        }
+        if (tituloCancion != null && !tituloCancion.isEmpty() && usuarioId != null) {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("KaraokePU");
+            EntityManager em = emf.createEntityManager();
 
-        // Verificar si se encontró el id de la canción
-        if (cancionId == -1) {
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setHeaderText("Error");
-            alerta.setContentText("No se encontró la canción en la base de datos.");
-            alerta.showAndWait();
-            return;
-        }
+            try {
+                em.getTransaction().begin();
+                String jpql = "SELECT c.id FROM Canciones c WHERE c.titulo = :titulo";
+                TypedQuery<Integer> query = em.createQuery(jpql, Integer.class);
+                query.setParameter("titulo", tituloCancion);
 
-        // Obtener el id_usuario (esto depende de tu aplicación)
-        int idUsuario = obtenerIdUsuarioActivo();
+                Integer cancionId = query.getSingleResult();
 
-        // Insertar la nueva canción cantada
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "INSERT INTO canciones_cantadas (cancion_id, titulo, fecha, veces_cantada, id_usuario) VALUES (?, ?, ?, ?, ?)";
-            // Crear la fecha actual (usando la fecha SQL)
-            Date fechaActual = Date.valueOf(LocalDate.now());
+                // Obtener la canción desde la base de datos antes de asociarla
+                Canciones cancion = em.find(Canciones.class, cancionId);
 
-            // Preparar la consulta para la inserción
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, cancionId);  // Establece el id de la canción
-                stmt.setString(2, tituloCancion);  // Establece el título de la canción
-                stmt.setDate(3, fechaActual);  // Establece la fecha actual
-                stmt.setInt(4, vecesCantada);  // Establece las veces cantadas
-                stmt.setInt(5, idUsuario);  // Establece el id del usuario
+                if (cancion != null) {
+                    // Crear y persistir la CancionesCantada
+                    CancionesCantada cancionesCantada = new CancionesCantada();
+                    cancionesCantada.setTitulo(tituloCancion);
+                    cancionesCantada.setVecesCantada(vecesCantada);
+                    cancionesCantada.setIdUsuario(usuarioId);
+                    cancionesCantada.setFecha(sqlDate);
+                    cancionesCantada.setCancion(cancion);  // Asignamos el objeto Canciones
 
-                // Ejecutar la consulta
-                int rowsAffected = stmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    // Si la inserción fue exitosa
-                    Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-                    alerta.setHeaderText("Éxito");
-                    alerta.setContentText("La canción se ha añadido correctamente.");
-                    alerta.showAndWait();
-
-                    // Limpiar los campos después de guardar
-                    cancion.getSelectionModel().clearSelection();
-                    escuchar.getValueFactory().setValue(1);  // Resetea el Spinner a 1
+                    em.persist(cancionesCantada);  // Guardamos la entidad CancionesCantada
+                    em.getTransaction().commit();  // Confirmamos la transacción
+                    System.out.println("Inserción realizada con éxito en canciones_cantadas.");
                 } else {
-                    // Si no se pudo insertar
-                    Alert alerta = new Alert(Alert.AlertType.ERROR);
-                    alerta.setHeaderText("Error");
-                    alerta.setContentText("Hubo un problema al añadir la canción.");
-                    alerta.showAndWait();
+                    System.err.println("Canción no encontrada en la base de datos.");
+                    em.getTransaction().rollback();  // Deshacemos la transacción si no se encuentra la canción
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Error al insertar en canciones_cantadas.");
+                if (em.getTransaction().isActive()) {
+                    em.getTransaction().rollback(); // Deshacer la transacción en caso de error
+                }
+            } finally {
+                em.close();
+                emf.close();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setHeaderText("Error");
-            alerta.setContentText("Hubo un error al acceder a la base de datos.");
-            alerta.showAndWait();
+        } else {
+            System.err.println("No se ha proporcionado toda la información necesaria.");
         }
     }
 
-    // Método ejemplo para obtener el id del usuario activo
-    private int obtenerIdUsuarioActivo() {
-        // Este método debería devolver el id del usuario que está actualmente autenticado
-        // Esto dependerá de cómo gestionas la autenticación de usuarios en tu aplicación
-        return 1; // Aquí estamos devolviendo un valor fijo como ejemplo
-    }
+
+
+
 
     @FXML
     void onCancelarAction(ActionEvent event) {
@@ -224,6 +195,10 @@ public class AñadirCancionesCantadasController implements Initializable {
 
     public void setRoot(BorderPane root) {
         this.root = root;
+    }
+
+    public void setUsuarioId(Integer usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
 

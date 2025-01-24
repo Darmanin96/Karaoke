@@ -99,6 +99,9 @@ public class CancionesCantadasController implements Initializable {
             stage.setTitle("Karaoke App");
             stage.setScene(new Scene(root));
             stage.initStyle(StageStyle.UNDECORATED);
+            AñadirCancionesCantadasController controller = loader.getController();
+            // Pasar el usuarioId al controlador
+            controller.setUsuarioId(this.usuarioId);
             stage.show();
 
         } catch (IOException e) {

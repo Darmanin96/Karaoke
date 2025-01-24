@@ -33,7 +33,7 @@ public class CancionesCantada {
     @Column(name = "id_usuario")
     private int idUsuario;
 
-    private int cancionId;
+
 
 
 
@@ -78,14 +78,7 @@ public class CancionesCantada {
         this.idUsuario = idUsuario;
     }
 
-        public int getCancionId() {
-            return cancionId;
-        }
-
-        public void setCancionId(int cancionId) {
-            this.cancionId = cancionId;
-        }
-    }
+}
 
 
 
