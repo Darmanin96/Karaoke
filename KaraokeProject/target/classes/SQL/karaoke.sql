@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-01-2025 a las 21:36:26
+-- Tiempo de generación: 27-01-2025 a las 09:18:31
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -23,8 +23,16 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 
+DROP DATABASE IF EXISTS karaoke;
+CREATE DATABASE IF NOT EXISTS karaoke;
+use karaoke;
+
+
 --
 -- Estructura de tabla para la tabla `canciones`
+
+
+
 --
 
 CREATE TABLE `canciones` (
@@ -63,9 +71,8 @@ CREATE TABLE `canciones_cantadas` (
 --
 
 INSERT INTO `canciones_cantadas` (`cancion_id`, `titulo`, `fecha`, `veces_cantada`, `id_usuario`) VALUES
-(2, 'Bohemian Rhapsody', '2025-01-21', 3, 2),
-(3, 'Shape of You', '2025-01-21', 1, 1),
-(4, 'Rolling in the Deep', '2025-01-21', 3, 1);
+(1, 'Imagine', '2025-01-24', 1, 1),
+(2, 'Bohemian Rhapsody', '2025-01-24', 1, 1);
 
 -- --------------------------------------------------------
 
